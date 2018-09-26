@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>web音乐播放器</title>
+	
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+
+  <style>
+           #phone{
+               
+               width:320px;
+               height:600px;
+               background: black;
+               margin:30px  auto;   //上下间距50px   左右自动居中 	      
+            }
+           #play{                    
+
+            width:220px;
+            height:200px;
+            background: url("image/icon.png");
+            margin:auto;
+      
+           }  
+           #font{
+           font-family: serif;
+           font-size: 50px;
+           color:red;
+           }
+           #songname{
+           font-family: serif;
+           font-size: 20px;
+           color:yellow;
+           
+           }
+
+  </style>
+  </head>
+  <body>
+      <div id = "phone">
+                <div id = "font" align = "center"> LK音乐播放器</div>
+                <div id = "songname"> <marquee>一场恋爱 --- 杨宗纬</marquee> </div>
+                <div id = "play"></div>
+                <canvas  id = "canvas"  width = 300px  height = 200px></canvas>
+                <div id = "qiege">
+                  <img id = "last"  src = "image/last.png"/>                  
+                  <img id = "play1"  src = "image/play.png"/>
+                  <img id = "next"  src = "image/next.png"/>
+                </div>             
+      </div>         
+            <audio src = "musiclist/one.mp3" id = "myMusic" crossOrigin = "anonymous"></audio>  
+            <script   type = "text/javascript">
+            //获取点击按钮及音频标签
+            var  oplay = document.getElementById("play");
+            var  lastplay = document.getElementById("last");
+            var  pauseplay = document.getElementById("play1");
+            var  nextplay = document.getElementById("next");
+                    
+                 lastplay.onclick = function(){
+                     document.getElementById('myMusic').src = "musiclist/two.mp3";
+                     myMusic.play();
+                     document.getElementById('play1').src = "image/pause.png";
+                 }
+                 nextplay.onclick = function(){
+                     document.getElementById('myMusic').src = "musiclist/three.mp3";
+                     myMusic.play();
+                     document.getElementById('play1').src = "image/pause.png";
+                 }
+                 
+          //播放 暂停按钮实现音乐播放 暂停设置
+                 var isplay = true;
+                 pauseplay.onclick = function(){
+                 if(isplay){
+                    document.getElementById('play1').src = "image/pause.png";
+                    isplay = false;
+                    myMusic.play();
+                    }
+                    else{
+                    document.getElementById('play1').src = "image/play.png";
+                    isplay = true;
+                    myMusic.pause();
+                    }
+                 }
+          //点击图标 实现播放 暂停音乐设置
+                 var mark = true;
+                 oplay.onclick = function(){
+          
+                 if(mark){
+                      myMusic.play();//播放音乐实现与按钮同步
+                      document.getElementById('play1').src = "image/pause.png";
+                      mark = false;
+                  }
+                else{
+                      myMusic.pause();
+                      document.getElementById('play1').src = "image/play.png";
+                      mark = true;              
+                 }
+             }
+             
+             
+             //------------------------------------------------------------
+                var   can = document.getElementById("canvas");
+                var   ctx =  can.getContext("2d"); 
+                 
+            //调用音频上文cpi
+                 window.AudioContext = window.AudioContext || 
+                 window.webkitAudioContext || window.mozAudioContext;
+            //实例化一个音频上下文节点
+            
+                   var   actx = new AudioContext();
+               //创建分析节点
+            
+                  var  analyser = actx.createAnalyser();
+            //创建数据源节点
+            
+                  var  audioSrc = actx.createMediaElementSource(myMusic); 
+                  
+                  //把数据源节点分析节点链接
+                  audioSrc.connect(analyser);
+                  //分析节点  扬声器节点链接
+                  analyser.connect(actx.destination);
+                                   
+                  var color = ctx.createLinearGradient(can.width/2,0,can.width/2,100);
+                  color.addColorStop(0,"#00f");
+                  color.addColorStop(0.5,"#f00");
+                  color.addColorStop(1,"#0f0");
+                  
+                  var color2 = ctx.createLinearGradient(can.width/2,100,can.width/2,200);
+                  color2.addColorStop(0,"#0f0");
+                  color2.addColorStop(0.5,"#f00");
+                  color2.addColorStop(1,"#00f");
+                                   
+                  var num = 100;
+                  function draw(){
+                  //创建一个音频数据等长的数组  Unit8Array
+                  var voicehigh = new Uint8Array(analyser.frequencyBinCount);
+                  //从分析节点获取音频数据添加到数组里面
+                  analyser.getByteFrequencyData(voicehigh);
+                  //实现四舍五入
+                  var  step = Math.round(voicehigh.length/num);
+                  //清除数据
+                      ctx.clearRect(0,0,can.width,can.height);
+                      for(var i = 0;i < num;i ++ ){
+                      
+                      var  value = (voicehigh[step*i])/3;
+                      ctx.fillStyle = color;
+                      
+                      ctx.fillRect(i*10+can.width/2,100,7,-value+1);
+                      ctx.fillRect(can.width/2-(i-1)*10,100,7,-value+1);
+                      
+                      ctx.fillStyle = color2;
+                      ctx.fillRect(i*10,100,7,value+1);
+                      ctx.fillRect(can.width/2-(i-1)*10,100,7,value+1);
+                      }
+                  //原生js经动画不断重复播放                 
+                  requestAnimationFrame(draw);
+                  }
+                  draw();
+            </script>            
+  </body>
+</html>
